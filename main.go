@@ -180,8 +180,12 @@ func cmdToTx(cmd string, signer *signer) (*types.Transaction, error) {
 			tokenAddress = common.HexToAddress("0x6b175474e89094c44da98b954eedeac495271d0f")
 		} else if token == "rdai" {
 			tokenAddress = common.HexToAddress("0xad6d458402f60fd3bd25163575031acdce07538d")
+		} else if token == "usdc" {
+			tokenAddress = common.HexToAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48")
+		} else if token == "usdt" {
+			tokenAddress = common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7")
 		} else {
-			return nil, fmt.Errorf("token is invalid")
+			tokenAddress = common.HexToAddress(token)
 		}
 	}
 
