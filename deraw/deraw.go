@@ -60,6 +60,9 @@ func showTx(txType int, tx [][]byte) {
 		fmt.Printf(" to\t\t\t\t= 0x%x\n", tx[3])
 		fmt.Printf(" value\t\t\t\t= %18.18f ETH (0x%x)\n", weiTo(bytesToBigInt(tx[4]), params.Ether), tx[4])
 		fmt.Printf(" data\t\t\t\t= 0x%x\n", tx[5])
+		if desc := describeCalldata(tx[5], tx[3]); desc != "" {
+			fmt.Printf(" \t\t\t\t= %s\n", desc)
+		}
 	} else if txType == 2 {
 		// https://eips.ethereum.org/EIPS/eip-1559
 		// rlp([chain_id, nonce, max_priority_fee_per_gas, max_fee_per_gas, gas_limit, destination, amount, data, access_list, signature_y_parity, signature_r, signature_s])
@@ -71,9 +74,39 @@ func showTx(txType int, tx [][]byte) {
 		fmt.Printf(" destination\t\t\t= 0x%x\n", tx[5])
 		fmt.Printf(" amount\t\t\t\t= %18.18f ETH (0x%x)\n", weiTo(bytesToBigInt(tx[6]), params.Ether), tx[6])
 		fmt.Printf(" data\t\t\t\t= 0x%x\n", tx[7])
+		if desc := describeCalldata(tx[7], tx[5]); desc != "" {
+			fmt.Printf(" \t\t\t\t= %s\n", desc)
+		}
 	} else {
 		die("tx type is invalid or not implemented:", txType)
 	}
+}
+
+func describeCalldata(calldata []byte, to []byte) string {
+	if len(calldata) == 0 {
+		return ""
+	}
+
+	if bytes.Equal(calldata[0:4], []byte{0xa9, 0x05, 0x9c, 0xbb}) {
+		// transfer(address, uint256)
+		contract := hex.EncodeToString(to)
+
+		to := bytes.Trim(calldata[4:36], "\x00")
+		amount := new(big.Int)
+		amount.SetBytes(calldata[36:68])
+		decimals := 18
+		decimalsQuo := 1e18
+
+		// usdt & usdc have 6 decimals
+		if contract == "dac17f958d2ee523a2206206994597c13d831ec7" || contract == "a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" {
+			decimals = 6
+			decimalsQuo = 1e6
+		}
+
+		return fmt.Sprintf("transfer to: 0x%x amount: %.[3]*[2]f (decimals: %d)", to, weiTo(amount, decimalsQuo), decimals)
+	}
+
+	return ""
 }
 
 // https://github.com/ethereum/go-ethereum/issues/21221
