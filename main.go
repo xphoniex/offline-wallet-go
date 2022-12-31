@@ -117,7 +117,8 @@ func initiateWalletFromCmd(cmd *string) (*signer, error) {
 			return nil, err
 		}
 
-		if index != 0 {
+		_, isVerbose := os.LookupEnv("VERBOSE")
+		if isVerbose {
 			fmt.Println("Index:", index, " Private key:", privateKey)
 		}
 	}
