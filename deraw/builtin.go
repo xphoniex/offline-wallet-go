@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/hex"
+	"fmt"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
-func deraw() {
+func deraw() int {
 
 	// eip-1559 tx: 0xc2163f50770bd4bfd3c13848b405a56a451ae2a39cfa5a236ea2738ce44aa9df
 	rawTx := "02f8740181bf8459682f00851191460ee38252089497e542ec6b81dea28f212775ce8ac436ab77a7df880de0b6b3a764000080c080a02bc11202cee115fe22558ce2edb25c621266ce75f75e9b10da9a2ae72460ad4ea07d573eef31fdebf0f5f93eb7721924a082907419eb97a8dda0dd20a4a5b954a1"
@@ -26,4 +29,6 @@ func deraw() {
 	}
 
 	spew.Dump(tx)
+
+	return 0
 }
