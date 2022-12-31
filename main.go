@@ -89,12 +89,24 @@ func initiateWalletFromCmd(cmd *string) (*signer, error) {
 		privateKey = strings.TrimSuffix(string(privateKey_), "\n")
 	} else if strings.HasPrefix(*cmd, "m/") {
 		mnemonic := strings.TrimPrefix(*cmd, "m/")
+		index := 0
+		pieces := strings.Split(mnemonic, "/")
+		if len(pieces) == 2 {
+			idx, err := strconv.Atoi(pieces[1])
+			if err != nil {
+				return nil, err
+			}
+
+			index = idx
+			mnemonic = pieces[0]
+		}
+
 		wallet, err := hdwallet.NewFromMnemonic(mnemonic)
 		if err != nil {
 			return nil, err
 		}
 
-		path := hdwallet.MustParseDerivationPath("m/44'/60'/0'/0/0")
+		path := hdwallet.MustParseDerivationPath(fmt.Sprintf("m/44'/60'/0'/0/%d", index))
 		account, err := wallet.Derive(path, true)
 		if err != nil {
 			return nil, err
@@ -103,6 +115,10 @@ func initiateWalletFromCmd(cmd *string) (*signer, error) {
 		privateKey, err = wallet.PrivateKeyHex(account)
 		if err != nil {
 			return nil, err
+		}
+
+		if index != 0 {
+			fmt.Println("Index:", index, " Private key:", privateKey)
 		}
 	}
 

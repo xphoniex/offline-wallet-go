@@ -37,6 +37,21 @@ func TestMnemonicWalletInitiation(t *testing.T) {
 	}
 }
 
+func TestMnemonicWalletInitiationIndexed(t *testing.T) {
+	cmd := "m/sound company scorpion ceiling museum edge keen diary bargain lake duty rapid/10"
+	signer, err := initiateWalletFromCmd(&cmd)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	target := common.HexToAddress("0x81aD3882bF1DCBeFe6dEF162a51670a6993BF85f")
+
+	if *signer.address != target {
+		t.Errorf("Signer address %s doesn't match target address %s", signer.address, target)
+	}
+}
+
 func TestEthTx(t *testing.T) {
 	cmd := "p/0x9d542624d9ef903daa81bfc3ba224ac15f3b55cd2bc5b09779b258d9fa753296"
 	signer, err := initiateWalletFromCmd(&cmd)
