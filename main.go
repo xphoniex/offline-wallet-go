@@ -132,6 +132,7 @@ func cmdToTx(cmd string, signer *signer) (*types.Transaction, error) {
 	var gas uint64
 	var to common.Address
 	var data []byte
+	var fn string // parameter-less generic fn to call, for more complex fns, supply `data`
 
 	gasTipCap := new(big.Int)
 	gasFeeCap := new(big.Int)
@@ -185,6 +186,8 @@ func cmdToTx(cmd string, signer *signer) (*types.Transaction, error) {
 			}
 		case "token":
 			token = value
+		case "fn":
+			fn = value
 		}
 
 		if err != nil {
@@ -214,7 +217,10 @@ func cmdToTx(cmd string, signer *signer) (*types.Transaction, error) {
 	var tx *types.Transaction
 	var err error
 
-	if token != "" {
+	if fn != "" {
+		data = genericFn(fn)
+		tx, err = signer.createDynamicFeeTx(nonce, gas, gasTipCap, gasFeeCap, chainID, amount, data, &to)
+	} else if token != "" {
 		data = transferERC20(tokenAddress, to, amount)
 		amount = big.NewInt(0)
 		tx, err = signer.createDynamicFeeTx(nonce, gas, gasTipCap, gasFeeCap, chainID, amount, data, &tokenAddress)
@@ -246,6 +252,17 @@ func transferERC20(tokenAddress, toAddress common.Address, amount *big.Int) (dat
 	data = append(data, methodID...)
 	data = append(data, paddedAddress...)
 	data = append(data, paddedAmount...)
+
+	return
+}
+
+func genericFn(fn string) (data []byte) {
+	fnSig := []byte(fn)
+	hash := sha3.NewLegacyKeccak256()
+	hash.Write(fnSig)
+	methodID := hash.Sum(nil)[:4]
+
+	data = append(data, methodID...)
 
 	return
 }

@@ -103,3 +103,45 @@ func TestERC20Tx(t *testing.T) {
 		t.Errorf("Received tx %s doesn't match target tx %s", hex.EncodeToString(raw), hex.EncodeToString(target))
 	}
 }
+
+func TestGenericFnTx(t *testing.T) {
+	cmd := "p/0x9d542624d9ef903daa81bfc3ba224ac15f3b55cd2bc5b09779b258d9fa753296"
+	signer, err := initiateWalletFromCmd(&cmd)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1000000000 fn=hello()"
+	target, _ := hex.DecodeString("02f8740180843b9aca0085037e11d600830130b0940475f0d4a405a79b58f302bd22ecbdaf35b1759e843b9aca008419ff1d21c080a01e01b4746b8038ecd4ad1321ee6b98a8d01cae95b8698634b9842b1f1cbe7c7ca069f35dc878b33114e019bad502032552709747131617304e6814f409face24bd")
+
+	tx, err := cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw, err := tx.MarshalBinary()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(raw, target) {
+		t.Errorf("Received tx %s doesn't match target tx %s", hex.EncodeToString(raw), hex.EncodeToString(target))
+	}
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1000000000 data=19ff1d21"
+	tx, err = cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw, err = tx.MarshalBinary()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(raw, target) {
+		t.Errorf("Received tx %s doesn't match target tx %s", hex.EncodeToString(raw), hex.EncodeToString(target))
+	}
+
+}
