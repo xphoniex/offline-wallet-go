@@ -145,3 +145,232 @@ func TestGenericFnTx(t *testing.T) {
 	}
 
 }
+
+func TestSuffixInAmountTx(t *testing.T) {
+	cmd := "p/0x9d542624d9ef903daa81bfc3ba224ac15f3b55cd2bc5b09779b258d9fa753296"
+	signer, err := initiateWalletFromCmd(&cmd)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	// 1_ETH = 1000000000000000000
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1_ETH"
+	targetCmd := "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1000000000000000000"
+
+	tx, err := cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	targetTx, err := cmdToTx(targetCmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw , err := tx.MarshalBinary()
+	targetRaw, err := targetTx.MarshalBinary()
+
+	if !reflect.DeepEqual(raw, targetRaw) {
+		t.Errorf("Suffix in amount not working for '%s'\ntarget: %s\ngetting: %s", "_ETH", hex.EncodeToString(targetRaw), hex.EncodeToString(raw))
+	}
+
+	// 1.42_ETH = 1420000000000000000
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1.42_ETH"
+	targetCmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1420000000000000000"
+
+	tx, err = cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	targetTx, err = cmdToTx(targetCmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw , err = tx.MarshalBinary()
+	targetRaw, err = targetTx.MarshalBinary()
+
+	if !reflect.DeepEqual(raw, targetRaw) {
+		t.Errorf("Suffix in amount not working for '%s'\ntarget: %s\ngetting: %s", "_ETH", hex.EncodeToString(targetRaw), hex.EncodeToString(raw))
+	}
+
+	// 1.423573138390124883_ETH = 1423573138390124883
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1.423573138390124883_ETH"
+	targetCmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1423573138390124883"
+
+	tx, err = cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	targetTx, err = cmdToTx(targetCmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw , err = tx.MarshalBinary()
+	targetRaw, err = targetTx.MarshalBinary()
+
+	if !reflect.DeepEqual(raw, targetRaw) {
+		t.Errorf("Suffix in amount not working for '%s'\ntarget: %s\ngetting: %s", "_ETH", hex.EncodeToString(targetRaw), hex.EncodeToString(raw))
+	}
+
+	// 1512675.423573138390124883_ETH = 1512675423573138390124883
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1512675.423573138390124883_ETH"
+	targetCmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1512675423573138390124883"
+
+	tx, err = cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	targetTx, err = cmdToTx(targetCmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw , err = tx.MarshalBinary()
+	targetRaw, err = targetTx.MarshalBinary()
+
+	if !reflect.DeepEqual(raw, targetRaw) {
+		t.Errorf("Suffix in amount not working for '%s'\ntarget: %s\ngetting: %s", "_ETH", hex.EncodeToString(targetRaw), hex.EncodeToString(raw))
+	}
+
+	// _ETH = _18
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1.423573138390124883_ETH"
+	targetCmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=1.423573138390124883_18"
+
+	tx, err = cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	targetTx, err = cmdToTx(targetCmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw , err = tx.MarshalBinary()
+	targetRaw, err = targetTx.MarshalBinary()
+
+	if !reflect.DeepEqual(raw, targetRaw) {
+		t.Errorf("Suffix in amount not working for '%s'\ntarget: %s\ngetting: %s", "_ETH", hex.EncodeToString(targetRaw), hex.EncodeToString(raw))
+	}
+
+	// _USDC
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=200_USDC"
+	targetCmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=200000000 token=usdc"
+
+	tx, err = cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	targetTx, err = cmdToTx(targetCmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw , err = tx.MarshalBinary()
+	targetRaw, err = targetTx.MarshalBinary()
+
+	if !reflect.DeepEqual(raw, targetRaw) {
+		t.Errorf("Suffix in amount not working for '%s'\ntarget: %s\ngetting: %s", "_ETH", hex.EncodeToString(targetRaw), hex.EncodeToString(raw))
+	}
+
+	// _USDT
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=200_USDT"
+	targetCmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=200000000 token=usdt"
+
+	tx, err = cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	targetTx, err = cmdToTx(targetCmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw , err = tx.MarshalBinary()
+	targetRaw, err = targetTx.MarshalBinary()
+
+	if !reflect.DeepEqual(raw, targetRaw) {
+		t.Errorf("Suffix in amount not working for '%s'\ntarget: %s\ngetting: %s", "_ETH", hex.EncodeToString(targetRaw), hex.EncodeToString(raw))
+	}
+
+	// _DAI
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=200_DAI"
+	targetCmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=200000000000000000000 token=dai"
+
+	tx, err = cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	targetTx, err = cmdToTx(targetCmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw , err = tx.MarshalBinary()
+	targetRaw, err = targetTx.MarshalBinary()
+
+	if !reflect.DeepEqual(raw, targetRaw) {
+		t.Errorf("Suffix in amount not working for '%s'\ntarget: %s\ngetting: %s", "_ETH", hex.EncodeToString(targetRaw), hex.EncodeToString(raw))
+	}
+
+	// 200.123456_USDC = 200123456
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=200.123456_USDC"
+	targetCmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=200123456 token=usdc"
+
+	tx, err = cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	targetTx, err = cmdToTx(targetCmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw , err = tx.MarshalBinary()
+	targetRaw, err = targetTx.MarshalBinary()
+
+	if !reflect.DeepEqual(raw, targetRaw) {
+		t.Errorf("Suffix in amount not working for '%s'\ntarget: %s\ngetting: %s", "_ETH", hex.EncodeToString(targetRaw), hex.EncodeToString(raw))
+	}
+
+	// 200111222333.123456_USDC = 200111222333123456
+
+	cmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=200111222333.123456_USDC"
+	targetCmd = "nonce=0 gas=78000 gasTipCap=1000000000 gasFeeCap=15000000000 chainID=1 to=0x0475F0d4a405A79b58f302BD22ECbdAF35B1759e amount=200111222333123456 token=usdc"
+
+	tx, err = cmdToTx(cmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	targetTx, err = cmdToTx(targetCmd, signer)
+	if err != nil {
+		t.Error(err)
+	}
+
+	raw , err = tx.MarshalBinary()
+	targetRaw, err = targetTx.MarshalBinary()
+
+	if !reflect.DeepEqual(raw, targetRaw) {
+		t.Errorf("Suffix in amount not working for '%s'\ntarget: %s\ngetting: %s", "_ETH", hex.EncodeToString(targetRaw), hex.EncodeToString(raw))
+	}
+}

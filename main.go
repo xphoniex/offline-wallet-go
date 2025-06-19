@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"math/big"
 	"os"
 	"strconv"
@@ -176,7 +177,41 @@ func cmdToTx(cmd string, signer *signer) (*types.Transaction, error) {
 		case "to":
 			to = common.HexToAddress(value)
 		case "amount":
-			amount, ok = amount.SetString(value, 10)
+			pieces := strings.Split(value, "_")
+			if len(pieces) == 2 {
+				suffix := strings.ToUpper(pieces[1])
+				_decimals := 1
+				if suffix == "USDC" {
+					_decimals = 6
+					token = "usdc"
+				} else if suffix == "USDT" {
+					_decimals = 6
+					token = "usdt"
+				} else if suffix == "DAI" {
+					_decimals = 18
+					token = "dai"
+				} else if suffix == "ETH" {
+					_decimals = 18
+				} else {
+					_decimals, err = strconv.Atoi(suffix)
+
+					if err != nil {
+						return nil, err
+					}
+				}
+				decimals := big.NewInt(int64(_decimals))
+				ten := big.NewInt(10)
+				decimals.Exp(ten, decimals, nil)
+
+				amountF, _, _ := big.ParseFloat(pieces[0], 10, 236, big.ToNearestEven)
+				decimalsF := big.NewFloat(math.Pow(10, float64(_decimals)))
+				amountF.Mul(amountF, decimalsF)
+				amountStr := fmt.Sprintf("%f", amountF)
+
+				amount, ok = amount.SetString(strings.Split(amountStr, ".")[0], 10)
+			} else {
+				amount, ok = amount.SetString(value, 10)
+			}
 			if !ok {
 				err = fmt.Errorf("invalid value for amount")
 			}
